@@ -16,17 +16,17 @@ int main(int argc, char **argv) {
         int i;
 
         // Get current working directory, hostname, and username
-        char cwd[1024];
+        char cwd[256];
         getcwd(cwd, sizeof(cwd));
 
-        char hostname[1024];
+        char hostname[256];
         gethostname(hostname, sizeof(hostname));
         
-        char *username = getlogin();
+        char *username = getenv("USER");
 
         // Main loop for the commands
         while (1) {
-            // Promt string: username@hostname:cwd
+            // Promt string: username@hostname:cwd ~
             printf("%s@%s ~%s --- ", username, hostname, cwd);
 
             // Get command from stdin
@@ -46,6 +46,7 @@ int main(int argc, char **argv) {
             arguments[i] = NULL;
 
             if (fork() == 0) {
+                // Child process
                 execvp(arguments[0], arguments);
                 printf("Error: command not found.\n");
                 return 1;
@@ -55,7 +56,6 @@ int main(int argc, char **argv) {
             }
         }
         return 0;
-
     }
     else {
         printf("Error: stdin is not a terminal.\n");
