@@ -1,5 +1,9 @@
 {
     "files.associations": {
-        "stdlib.h": "c"
+        "*.mjml": "mjml",
+        "stdlib.h": "c",
+        "__config": "c",
+        "cstdio": "c",
+        "string.h": "c"
     }
 }
