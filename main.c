@@ -3,26 +3,62 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
-#define MAX_COMMAND_LENGTH 100
+#define MAX_COMMAND_LENGTH 1024
+#define MAX_ARGUMENTS 64
 
-int main() {
-    char command[MAX_COMMAND_LENGTH];
+int main(int argc, char **argv) {
+    if (isatty(fileno(stdin))) {
+        char command[MAX_COMMAND_LENGTH];
+        char *arguments[MAX_ARGUMENTS];
+        char *token;
+        int i;
 
-    while (1) {
-        printf("Shell> ");
-        fgets(command, MAX_COMMAND_LENGTH, stdin);
+        // Get current working directory, hostname, and username
+        char cwd[1024];
+        getcwd(cwd, sizeof(cwd));
 
-        // Remove trailing newline character
-        command[strcspn(command, "\n")] = '\0';
+        char hostname[1024];
+        gethostname(hostname, sizeof(hostname));
+        
+        char *username = getlogin();
 
-        if (strcmp(command, "exit") == 0) {
-            break;
+        // Main loop for the commands
+        while (1) {
+            // Promt string: username@hostname:cwd
+            printf("%s@%s ~%s --- ", username, hostname, cwd);
+
+            // Get command from stdin
+            fgets(command, MAX_COMMAND_LENGTH, stdin);
+            command[strlen(command) - 1] = '\0';
+
+            if (strcmp(command, "exit") == 0) {
+                break;
+            }
+
+            token = strtok(command, " ");
+            i = 0;
+            while (token != NULL) {
+                arguments[i++] = token;
+                token = strtok(NULL, " ");
+            }
+            arguments[i] = NULL;
+
+            if (fork() == 0) {
+                execvp(arguments[0], arguments);
+                printf("Error: command not found.\n");
+                return 1;
+            }
+            else {
+                wait(NULL);
+            }
         }
+        return 0;
 
-        // Execute the command using system()
-        system(command);
     }
-
-    return 0;
+    else {
+        printf("Error: stdin is not a terminal.\n");
+        return 1;
+    }
 }
