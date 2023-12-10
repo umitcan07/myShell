@@ -4,6 +4,9 @@
         "stdlib.h": "c",
         "__config": "c",
         "cstdio": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "command.h": "c",
+        "alias.h": "c",
+        "stdio.h": "c"
     }
 }

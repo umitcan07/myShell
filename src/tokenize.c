@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include "tokenize.h"
+
+/* Function:  tokenize
+ * --------------------
+ * Tokenizes the input string into tokens. The tokens are stored in the tokens array.
+ * 
+ * input: the string to tokenize
+ * tokens: the array to store the tokens in
+ * 
+ * returns: the number of tokens
+ */
+int tokenize(char *input, char *tokens[MAX_TOKENS]) {
+    int tokenCount = 0;
+    int inQuotes = 0;
+    char *token = malloc(MAX_TOKEN_LENGTH);
+    int tokenIndex = 0;
+    int length = strlen(input);
+
+    if (!token) {
+        return -1; // Memory allocation failed
+    }
+
+    for (int i = 0; i < length; i++) {
+        if (input[i] == '"') {
+            inQuotes = !inQuotes;
+            if (!inQuotes) {
+                token[tokenIndex] = '\0';
+                tokens[tokenCount++] = token;
+                token = malloc(MAX_TOKEN_LENGTH);
+                tokenIndex = 0;
+                if (!token) {
+                    return -1; // Memory allocation failed
+                }
+            }
+            continue;
+        }
+
+        if (input[i] == ' ' && !inQuotes) {
+            if (tokenIndex != 0) {
+                token[tokenIndex] = '\0';
+                tokens[tokenCount++] = token;
+                token = malloc(MAX_TOKEN_LENGTH);
+                tokenIndex = 0;
+                if (!token) {
+                    return -1; // Memory allocation failed
+                }
+            }
+        } else {
+            if (tokenIndex < MAX_TOKEN_LENGTH - 1) {
+                token[tokenIndex++] = input[i];
+            }
+        }
+    }
+
+    if (tokenIndex != 0) {
+        token[tokenIndex] = '\0';
+        tokens[tokenCount++] = token;
+    } else {
+        free(token);
+    }
+
+    return tokenCount;
+}
