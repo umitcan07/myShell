@@ -21,19 +21,20 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <limits.h>
 
-// int create_alias(char *alias_name, char *alias_command);
 #include "alias.h"
-// int create_alias(char *alias_name, char *alias_command);
 #include "tokenize.h"
-// int tokenize(char *input, char *tokens[MAX_TOKENS])
 #include "command.h"
 
 #define MAX_INPUT_LENGTH 256
 
-void print_tokens(char *tokens[MAX_TOKENS], int tokenCount);
+int add_directory_to_path(char *cwd, char *directory);
+
+
 
 int main(int argc, char **argv) {
+
     // Initialize variables for input and tokens
     char input[MAX_TOKEN_LENGTH];
     char *tokens[MAX_TOKENS];
@@ -41,68 +42,96 @@ int main(int argc, char **argv) {
     // Get current working directory, hostname, and username
     char cwd[256];
     getcwd(cwd, sizeof(cwd));
-
     char hostname[256];
     gethostname(hostname, sizeof(hostname));
-    
     char *username = getenv("USER");
+
+    // Add /bin to the PATH environment variable
+    add_directory_to_path("cwd", "bin");
 
     // Main loop for the commands
     while (1) {
         // Prompt string: username@hostname:cwd ---
         printf("%s@%s %s --- ", username, hostname, cwd);
 
-        // Get input
+        // Get input and remove trailing newline
         fgets(input, MAX_INPUT_LENGTH, stdin);
-
-        // Remove trailing newline
         input[strlen(input) - 1] = '\0';
 
         // Tokenize input
         int tokenCount = tokenize(input, tokens);
+
+        // print_tokens(tokens, tokenCount);
 
         // Check for exit command
         if (strcmp(tokens[0], "exit") == 0) {
             break;
         }
 
+        // Check for alias command
         if (strcmp(tokens[0], "alias") == 0) {
-            if (tokenCount != 4) {
-                printf("Error: Invalid number of arguments for 'alias' command.\n");
-                continue;
-            }
-
-            char *alias_name = tokens[1];
-            char *alias_command = tokens[3];
-
-            int result = create_alias(alias_name, alias_command);
-            if (result == 0) {
-                printf("Alias created successfully.\n");
-            } else {
-                printf("Error: Failed to create alias.\n");
-            }
+            handle_alias_command(tokens, tokenCount);
             continue;
+        } else {
+
+            pid_t pid = fork();
+            if(pid == 0) {
+                // If not an alias, check for redirection
+                execvp(tokens[0], tokens);
+            } else {
+                // Parent process
+                wait(NULL);
+            }
+
+
         }
+
+        
+
+
 
     }
 
     return 0;
 }
 
-/* Function:  print_tokens
+
+
+/* Function:  add_directory_to_path
  * --------------------
- * Prints the tokens in the tokens array.
+ * Adds a specified directory, relative to the current working directory, to the PATH environment variable.
  * 
- * tokens: the array of tokens to print
- * tokenCount: the number of tokens in the array
+ * directory: The directory to be added to PATH. This should be provided without a leading slash.
+ *            The directory is appended to the current working directory with an intervening slash.
  * 
- * returns: void
+ * Example Usage:
+ *     - If the current working directory is /home/user/project and the directory parameter is "bin",
+ *       then /home/user/project/bin will be added to PATH.
+ *     - Pass the directory parameter without a leading slash, e.g., "bin", not "/bin".
+ *
+ * returns: 0 if successful, 1 if not (e.g., due to errors in retrieving the current working directory or setting the environment variable).
  */
-void print_tokens(char *tokens[MAX_TOKENS], int tokenCount) {
-    for (int i = 0; i < tokenCount; i++) {
-        printf("%s\n", tokens[i]);
+int add_directory_to_path(char *cwd, char *directory) {
+    char cwd[PATH_MAX];
+
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        char newPath[PATH_MAX];
+        snprintf(newPath, sizeof(newPath), "%s/%s:%s", cwd, directory, getenv("PATH"));
+
+        if (setenv("PATH", newPath, 1) != 0) {
+            perror("setenv error");
+            return 1;
+        }
+
+    } else {
+        perror("getcwd() error");
+        return 1;
     }
+
+    return 0;
 }
+
+
 
 /* Function:  create_command
  * --------------------
@@ -113,15 +142,8 @@ void print_tokens(char *tokens[MAX_TOKENS], int tokenCount) {
  * 
  * returns: a pointer to the command struct
  */
+command *create_command(char *tokens[MAX_TOKENS], int tokenCount) {
+    command *cmd = malloc(sizeof(command));
 
-
-
-// #define MAX_ARGUMENTS 256
-
-// typedef struct command {
-//     int operation;
-//     char *arguments[MAX_ARGUMENTS];
-//     int num_arguments;
-//     int background;
-//     int redirect;
-// } command;
+    return cmd;
+}

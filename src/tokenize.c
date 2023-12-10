@@ -62,5 +62,24 @@ int tokenize(char *input, char *tokens[MAX_TOKENS]) {
         free(token);
     }
 
+    tokens[tokenCount] = NULL;
+
     return tokenCount;
+}
+
+
+
+/* Function:  print_tokens
+ * --------------------
+ * Prints the tokens in the tokens array.
+ * 
+ * tokens: the array of tokens to print
+ * tokenCount: the number of tokens in the array
+ * 
+ * returns: void
+ */
+void print_tokens(char *tokens[MAX_TOKENS], int tokenCount) {
+    for (int i = 0; i < tokenCount; i++) {
+        printf("%s\n", tokens[i]);
+    }
 }

@@ -6,3 +6,4 @@
 #define MAX_TOKEN_LENGTH 256
 
 int tokenize(char *input, char *tokens[MAX_TOKENS]);
+void print_tokens(char *tokens[MAX_TOKENS], int tokenCount);

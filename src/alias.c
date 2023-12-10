@@ -76,3 +76,31 @@ int create_alias(char *alias_name, char *alias_command) {
 
     return 0;
 }
+
+int handle_alias_command(char **tokens, int tokenCount) {
+    // Check for correct number of arguments
+    if (tokenCount != 4) {
+        printf("Error: Invalid number of arguments for 'alias' command.\n");
+        return 1;
+    }
+
+    // Check for correct syntax
+    if (strcmp(tokens[2], "=") != 0) {
+        printf("Error: Invalid syntax for 'alias' command.\n");
+        return 1;
+    }
+
+    char *alias_name = tokens[1];
+    char *alias_command = tokens[3];
+
+    // Create the alias
+    int result = create_alias(alias_name, alias_command);
+    if (result == 0) {
+        printf("Alias created successfully.\n");
+    } else {
+        printf("Error: Failed to create alias.\n");
+    }
+
+    return result;
+}
+
