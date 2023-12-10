@@ -80,6 +80,6 @@ int tokenize(char *input, char *tokens[MAX_TOKENS]) {
  */
 void print_tokens(char *tokens[MAX_TOKENS], int tokenCount) {
     for (int i = 0; i < tokenCount; i++) {
-        printf("%s\n", tokens[i]);
+        printf("Token[%d]: %s\n", i, tokens[i]);
     }
 }

@@ -46,8 +46,8 @@ int main(int argc, char **argv) {
     gethostname(hostname, sizeof(hostname));
     char *username = getenv("USER");
 
-    // Add /bin to the PATH environment variable
-    add_directory_to_path("cwd", "bin");
+    // Add bin directory to PATH
+    add_directory_to_path(argv[0], "bin");
 
     // Main loop for the commands
     while (1) {
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
         // Tokenize input
         int tokenCount = tokenize(input, tokens);
 
-        // print_tokens(tokens, tokenCount);
+        print_tokens(tokens, tokenCount);
 
         // Check for exit command
         if (strcmp(tokens[0], "exit") == 0) {
@@ -101,6 +101,7 @@ int main(int argc, char **argv) {
  * --------------------
  * Adds a specified directory, relative to the current working directory, to the PATH environment variable.
  * 
+ * cwd: The current working directory. This should be provided without a leading slash.
  * directory: The directory to be added to PATH. This should be provided without a leading slash.
  *            The directory is appended to the current working directory with an intervening slash.
  * 
@@ -112,23 +113,37 @@ int main(int argc, char **argv) {
  * returns: 0 if successful, 1 if not (e.g., due to errors in retrieving the current working directory or setting the environment variable).
  */
 int add_directory_to_path(char *cwd, char *directory) {
-    char cwd[PATH_MAX];
-
-    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-        char newPath[PATH_MAX];
-        snprintf(newPath, sizeof(newPath), "%s/%s:%s", cwd, directory, getenv("PATH"));
-
-        if (setenv("PATH", newPath, 1) != 0) {
-            perror("setenv error");
-            return 1;
-        }
-
-    } else {
-        perror("getcwd() error");
+    char *path = getenv("PATH"); // Get the current PATH
+    if (path == NULL) {
+        printf("Error: Unable to retrieve PATH environment variable.\n");
         return 1;
     }
 
-    return 0;
+    // Calculate the required buffer size
+    int requiredSize = strlen(cwd) + strlen(directory) + strlen(path) + 3; // +3 for the slash, colon, and null terminator
+
+    // Allocate memory for the new PATH
+    char *newPath = (char *)malloc(requiredSize * sizeof(char));
+    if (newPath == NULL) {
+        printf("Error: Memory allocation failed.\n");
+        return 1;
+    }
+
+    // Construct the new directory path and append it to the PATH
+    sprintf(newPath, "%s:%s/%s", path, cwd, directory); // Format: PATH:cwd/directory
+
+    // Set the new PATH
+    if (setenv("PATH", newPath, 1) != 0) {
+        printf("Error: Unable to set PATH environment variable.\n");
+        free(newPath);
+        return 1;
+    }
+
+    // Debugging purposes
+    // printf("New PATH: %s\n", newPath);
+
+    free(newPath); 
+    return 0; 
 }
 
 
