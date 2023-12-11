@@ -46,6 +46,9 @@ int main(int argc, char **argv) {
     gethostname(hostname, sizeof(hostname));
     char *username = getenv("USER");
 
+    // Last executed command string
+    char *last_command = NULL;
+
     // Add bin directory to PATH
     add_directory_to_path(argv[0], "bin");
 
@@ -55,13 +58,19 @@ int main(int argc, char **argv) {
         printf("%s@%s %s --- ", username, hostname, cwd);
 
         // Get input and remove trailing newline
-        fgets(input, MAX_INPUT_LENGTH, stdin);
+        if (fgets(input, MAX_INPUT_LENGTH, stdin) == NULL) {
+            printf("\n");
+            break; // Exit on EOF
+        }
         input[strlen(input) - 1] = '\0';
 
         // Tokenize input
         int tokenCount = tokenize(input, tokens);
+        if (tokenCount == 0) {
+            continue;
+        }
 
-        print_tokens(tokens, tokenCount);
+        // print_tokens(tokens, tokenCount);
 
         // Check for exit command
         if (strcmp(tokens[0], "exit") == 0) {
@@ -75,20 +84,38 @@ int main(int argc, char **argv) {
         } else {
 
             pid_t pid = fork();
+
             if(pid == 0) {
-                // If not an alias, check for redirection
-                execvp(tokens[0], tokens);
-            } else {
+                // Child process
+                if(strcmp(tokens[tokenCount - 1], "&") == 0) {
+                    // Run in background
+                    tokens[tokenCount - 1] = NULL;
+                }
+                if(execvp(tokens[0], tokens) == -1) {
+                    printf("Error command '%s' not found\n", tokens[0]);
+                    break;
+                }
+            }
+
+            else {
                 // Parent process
-                wait(NULL);
+                int status;
+
+                if(strcmp(tokens[tokenCount - 1], "&") == 0) {
+                    // Run in background
+                    printf("Running in background\n");
+                } else {
+                    // Run in foreground
+                    waitpid(pid, &status, 0);
+                }
+
             }
 
 
         }
 
-        
-
-
+        // Update the last_command
+        last_command = input;
 
     }
 

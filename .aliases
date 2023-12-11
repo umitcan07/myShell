@@ -1,4 +1,5 @@
-x = y z y
+x = echo  hello world
 ls = my new ls
 xyz = echo  hello world
 y = echo  hello world
+t = yy

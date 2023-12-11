@@ -24,7 +24,8 @@ Alternatively `make run` to compile and run the program.
 
 ### Difficulties Encountered
  * Whether or not tokenize anything in double quotes as a single token/word.
- *  
+ * Background processing.
 
 ### Limitations
+
 
