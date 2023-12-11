@@ -14,7 +14,6 @@ Alternatively `make run` to compile and run the program.
  * `&` - run the command in the background
  * `alias x = y` - create an alias for the command y, named x
 
-
 ### Some Design Decisions
  * It works in a fork-exec manner, meaning that it creates a child process for each command.
  * It can run each and every command in the PATH environment variable.
@@ -26,6 +25,10 @@ Alternatively `make run` to compile and run the program.
  * Whether or not tokenize anything in double quotes as a single token/word.
  * Background processing.
 
-### Limitations
+### Functional Limitations
+
+
+### Variable Limitations (Macros)
+
 
 

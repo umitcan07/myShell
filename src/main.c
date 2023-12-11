@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <limits.h>
+#include <signal.h>
 
 #include "alias.h"
 #include "tokenize.h"
@@ -29,8 +30,8 @@
 
 #define MAX_INPUT_LENGTH 256
 
-int add_directory_to_path(char *cwd, char *directory);
-
+int add_directory_to_path(char *directory);
+int signal_handler(int signum);
 
 
 int main(int argc, char **argv) {
@@ -50,7 +51,7 @@ int main(int argc, char **argv) {
     char *last_command = NULL;
 
     // Add bin directory to PATH
-    add_directory_to_path(argv[0], "bin");
+    add_directory_to_path("bin");
 
     // Main loop for the commands
     while (1) {
@@ -75,67 +76,7 @@ int main(int argc, char **argv) {
 
         print_tokens(tokens, tokenCount);
 
-        // Check for exit command
-        if (strcmp(tokens[0], "exit") == 0) {
-            break;
-        }
-
-        // Check for alias command
-        if (strcmp(tokens[0], "alias") == 0) {
-            if(handle_alias_command(tokens, tokenCount) == 0) {
-                // Update the last_command if everything was successful and print it wrt status
-                if (last_command != NULL) {
-                    free(last_command);
-                }
-                last_command = malloc(strlen(temp_input) + 1);
-                strcpy(last_command, temp_input);
-                // print last command
-                printf("Last command: %s\n", last_command);
-            }
-            continue;
-        } else {
-
-            pid_t pid = fork();
-
-            if(pid == 0) {
-                // Child process
-                if(strcmp(tokens[tokenCount - 1], "&") == 0) {
-                    // Run in background
-                    tokens[tokenCount - 1] = NULL;
-                }
-                if(execvp(tokens[0], tokens) == -1) {
-                    printf("Error command '%s' not found\n", tokens[0]);
-                    break;
-                }
-            }
-
-            else {
-                // Parent process
-                int status;
-
-                if(strcmp(tokens[tokenCount - 1], "&") == 0) {
-                    // Run in background
-                    printf("Running in background\n");
-                } else {
-                    // Run in foreground
-                    waitpid(pid, &status, 0);
-                }
-
-                if(status == 0) {
-                    if (last_command != NULL) {
-                        free(last_command);
-                    }
-                    last_command = malloc(strlen(temp_input) + 1);
-                    strcpy(last_command, temp_input);
-                    // print last command
-                    printf("Last command: %s\n", last_command);
-                }
-
-            }
-
-
-        }
-
+        
 
 
     }
@@ -160,8 +101,14 @@ int main(int argc, char **argv) {
  *
  * returns: 0 if successful, 1 if not (e.g., due to errors in retrieving the current working directory or setting the environment variable).
  */
-int add_directory_to_path(char *cwd, char *directory) {
-    char *path = getenv("PATH"); // Get the current PATH
+int add_directory_to_path(char *directory) {
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        perror("Error getting current working directory");
+        return 1;
+    }
+
+    char *path = getenv("PATH");
     if (path == NULL) {
         printf("Error: Unable to retrieve PATH environment variable.\n");
         return 1;
@@ -187,26 +134,20 @@ int add_directory_to_path(char *cwd, char *directory) {
         return 1;
     }
 
-    // Debugging purposes
-    // printf("New PATH: %s\n", newPath);
+    printf("New PATH: %s\n", newPath); // For debugging purposes
 
-    free(newPath); 
-    return 0; 
+    free(newPath);
+    return 0;
 }
 
 
-
-/* Function:  create_command
+/* Function:  signal_handler
  * --------------------
- * Creates a command struct from the tokens.
+ *
+ * signum: The signal number.
  * 
- * tokens: the array of tokens to create the command from
- * tokenCount: the number of tokens in the array
  * 
- * returns: a pointer to the command struct
  */
-command *create_command(char *tokens[MAX_TOKENS], int tokenCount) {
-    command *cmd = malloc(sizeof(command));
-
-    return cmd;
+int signal_handler(int signum) {
+    
 }
