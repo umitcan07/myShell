@@ -63,6 +63,9 @@ int main(int argc, char **argv) {
             break; // Exit on EOF
         }
         input[strlen(input) - 1] = '\0';
+        // Keep a temporary copy of the input
+        char temp_input[MAX_INPUT_LENGTH];
+        strcpy(temp_input, input);
 
         // Tokenize input
         int tokenCount = tokenize(input, tokens);
@@ -70,7 +73,7 @@ int main(int argc, char **argv) {
             continue;
         }
 
-        // print_tokens(tokens, tokenCount);
+        print_tokens(tokens, tokenCount);
 
         // Check for exit command
         if (strcmp(tokens[0], "exit") == 0) {
@@ -79,7 +82,16 @@ int main(int argc, char **argv) {
 
         // Check for alias command
         if (strcmp(tokens[0], "alias") == 0) {
-            handle_alias_command(tokens, tokenCount);
+            if(handle_alias_command(tokens, tokenCount) == 0) {
+                // Update the last_command if everything was successful and print it wrt status
+                if (last_command != NULL) {
+                    free(last_command);
+                }
+                last_command = malloc(strlen(temp_input) + 1);
+                strcpy(last_command, temp_input);
+                // print last command
+                printf("Last command: %s\n", last_command);
+            }
             continue;
         } else {
 
@@ -109,13 +121,22 @@ int main(int argc, char **argv) {
                     waitpid(pid, &status, 0);
                 }
 
+                if(status == 0) {
+                    if (last_command != NULL) {
+                        free(last_command);
+                    }
+                    last_command = malloc(strlen(temp_input) + 1);
+                    strcpy(last_command, temp_input);
+                    // print last command
+                    printf("Last command: %s\n", last_command);
+                }
+
             }
 
 
         }
 
-        // Update the last_command
-        last_command = input;
+
 
     }
 

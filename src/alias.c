@@ -77,6 +77,16 @@ int create_alias(char *alias_name, char *alias_command) {
     return 0;
 }
 
+
+/* Function:  handle_alias_command
+ * --------------------
+ * Handles the 'alias' command. This function should be called when the user enters the 'alias' command.
+ * 
+ * tokens: an array of tokens from the input
+ * tokenCount: the number of tokens in the array
+ * 
+ * returns: 0 if the command is handled successfully, 1 otherwise
+ */
 int handle_alias_command(char **tokens, int tokenCount) {
     // Check for correct number of arguments
     if (tokenCount < 4) {
@@ -112,3 +122,29 @@ int handle_alias_command(char **tokens, int tokenCount) {
     return result;
 }
 
+char *get_alias(char *alias_name) {
+    FILE *file;
+    char line[1024];
+
+    // Open the .aliases file for reading
+    file = fopen(".aliases", "r");
+    if (file == NULL) {
+        printf("Error: Failed to open .aliases file.\n");
+        return NULL;
+    }
+
+    // Read the file line by line
+    while (fgets(line, sizeof(line), file)) {
+        char existing_alias[256];
+        char existing_command[1024];
+        sscanf(line, "%s = %s", existing_alias, existing_command); // Extract the alias name and command from the line
+
+        if (strcmp(existing_alias, alias_name) == 0) {
+            fclose(file);
+            return strdup(existing_command);
+        }
+    }
+
+    fclose(file);
+    return NULL;
+}
