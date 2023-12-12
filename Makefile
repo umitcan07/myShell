@@ -1,7 +1,8 @@
+SRC = ${wildcard src/*.c}
+
 # Default target for compilation
-default:
-	gcc src/bello.c -o bin/bello
-	gcc src/main.c src/tokenize.c src/alias.c -o ./myshell
+default: $(SRC)
+	gcc $^ -o ./myshell
 
 # Run target for executing the program after compilation
 run: default

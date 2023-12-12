@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "tokenize.h"
+
+#include "../lib/tokenize.h"
 
 /* Function:  tokenize
  * --------------------

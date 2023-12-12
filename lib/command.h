@@ -1,12 +1,3 @@
-/* Command structure
- * Fields:
- * - operation: NONE | EXIT | ALIAS | OTHER
- * - arguments: char *[]
- * - num_arguments: int
- * - background: int (0 = false, 1 = true)
- * - redirect: NONE | OUTPUT | APPEND | REVERSE
- */
-
 #define MAX_ARGUMENTS 256
 
 typedef enum operation {
@@ -32,3 +23,4 @@ typedef struct command {
 } command;
 
 command parse_command(char *tokens[], int tokenCount);
+void print_command(command cmd);

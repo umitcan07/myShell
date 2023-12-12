@@ -1,4 +1,4 @@
-#include "alias.h"
+#include "../lib/alias.h"
 
 /*
  * Function:  create_alias
@@ -122,29 +122,3 @@ int handle_alias_command(char **tokens, int tokenCount) {
     return result;
 }
 
-char *get_alias(char *alias_name) {
-    FILE *file;
-    char line[1024];
-
-    // Open the .aliases file for reading
-    file = fopen(".aliases", "r");
-    if (file == NULL) {
-        printf("Error: Failed to open .aliases file.\n");
-        return NULL;
-    }
-
-    // Read the file line by line
-    while (fgets(line, sizeof(line), file)) {
-        char existing_alias[256];
-        char existing_command[1024];
-        sscanf(line, "%s = %s", existing_alias, existing_command); // Extract the alias name and command from the line
-
-        if (strcmp(existing_alias, alias_name) == 0) {
-            fclose(file);
-            return strdup(existing_command);
-        }
-    }
-
-    fclose(file);
-    return NULL;
-}

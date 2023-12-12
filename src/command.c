@@ -2,88 +2,70 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "command.h"
-
-/* Command structure
- * Fields:
- * - operation: NONE | EXIT | ALIAS | OTHER
- * - arguments: char *[]
- * - num_arguments: int
- * - background: int (0 = false, 1 = true)
- * - redirect: NONE | OUTPUT | APPEND | REVERSE
- */
-
-// #define MAX_ARGUMENTS 256
-
-// typedef struct command {
-//     operation op;
-//     char *arguments[MAX_ARGUMENTS];
-//     int num_arguments;
-//     int background;
-//     redirect redirect;
-// } command;
-
-// typedef enum operation {
-//     NONE,
-//     EXIT,
-//     ALIAS,
-//     OTHER
-// } operation;
-
-// typedef enum redirect {
-//     NONE,
-//     OUTPUT,
-//     APPEND,
-//     REVERSE
-// } redirect;
+#include "../lib/command.h"
 
 command parse_command(char *tokens[], int tokenCount) {
     command cmd;
-    cmd.op = OTHER;
+    cmd.op = OTHER; // Default to OTHER for regular commands
     cmd.num_arguments = 0;
     cmd.background = 0;
-    cmd.redirect = NONE;
+    cmd.redirect = NO_REDIRECT;
 
-    // Check for empty command
+    // Early exit for empty command
     if (tokenCount == 0) {
+        cmd.op = NO_OP;
         return cmd;
     }
 
-    // Check for exit command
+    // Handle special commands
     if (strcmp(tokens[0], "exit") == 0) {
         cmd.op = EXIT;
-        return cmd;
-    }
-
-    // Check for alias command
-    if (strcmp(tokens[0], "alias") == 0) {
+    } else if (strcmp(tokens[0], "alias") == 0) {
         cmd.op = ALIAS;
-        return cmd;
+        // Additional alias handling logic can be added here
     }
 
-    // Check for background command
-    if (strcmp(tokens[tokenCount - 1], "&") == 0) {
-        cmd.background = 1;
-        tokenCount--;
-    }
+    // Parse arguments and check for background/redirect flags
+    for (int i = 0; i < tokenCount; ++i) {
+        if (strcmp(tokens[i], "&") == 0) {
+            cmd.background = 1;
+            continue; // Skip the '&' token and continue processing
+        }
 
-    // Check for redirect command
-    if (strcmp(tokens[tokenCount - 2], ">") == 0) {
-        cmd.redirect = OUTPUT;
-        tokenCount -= 2;
-    } else if (strcmp(tokens[tokenCount - 2], ">>") == 0) {
-        cmd.redirect = APPEND;
-        tokenCount -= 2;
-    } else if (strcmp(tokens[tokenCount - 2], ">>>") == 0) {
-        cmd.redirect = REVERSE;
-        tokenCount -= 2;
-    }
+        if (i < tokenCount - 1) { // Check next token for redirection
+            if (strcmp(tokens[i], ">") == 0) {
+                cmd.redirect = OUTPUT;
+                cmd.arguments[cmd.num_arguments++] = tokens[i + 1]; // Next token is the file name
+                i++; // Skip the next token as it's already processed
+                continue;
+            } else if (strcmp(tokens[i], ">>") == 0) {
+                cmd.redirect = APPEND;
+                cmd.arguments[cmd.num_arguments++] = tokens[i + 1];
+                i++;
+                continue;
+            } else if (strcmp(tokens[i], ">>>") == 0) {
+                cmd.redirect = REVERSE;
+                cmd.arguments[cmd.num_arguments++] = tokens[i + 1];
+                i++;
+                continue;
+            }
+        }
 
-    // Copy arguments into command structure
-    for (int i = 0; i < tokenCount; i++) {
-        cmd.arguments[i] = tokens[i];
-        cmd.num_arguments++;
+        // Regular argument
+        cmd.arguments[cmd.num_arguments++] = tokens[i];
     }
 
     return cmd;
 }
+
+
+void print_command(command cmd) {
+    printf("Operation: %d\n", cmd.op);
+    printf("Arguments (%d): ", cmd.num_arguments);
+    for (int i = 0; i < cmd.num_arguments; ++i) {
+        printf("%s ", cmd.arguments[i]);
+    }
+    printf("\nBackground: %d\n", cmd.background);
+    printf("Redirect: %d\n", cmd.redirect);
+}
+
