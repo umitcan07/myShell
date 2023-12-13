@@ -62,3 +62,13 @@ myshell
 report.md
 src
 x.y
+Parent PID: 16570
+Number of child processes: 0
+1. Usernameeee: umitcanevleksiz
+2. Hostname: Umits-MacBook-Pro.local
+3. Last Executed Command: bello -q
+4. TTY: /dev/ttys059
+5. Current Shell Name: /bin/zsh
+6. Home Location: /Users/umitcanevleksiz
+7. Current Time and Date: Wed Dec 13 21:28:56 2023
+8. Current Number of Processes: 0

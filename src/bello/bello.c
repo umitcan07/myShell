@@ -2,7 +2,7 @@
 
 void print_info(char *username, char *hostname, char *last_executed_command, char *tty, char *shell_name, char *home_location, time_t time_info, struct tm *time_struct, int process_count);
 int is_number(const char *s);
-int get_child_processes(pid_t parent_pid, pid_t *child_pids, size_t max_children);
+int get_child_processes(pid_t parent_pid);
 
 int main(int argc, char **argv) { return bello(); }
 
@@ -64,13 +64,12 @@ int bello() {
     struct tm *time_info = localtime(&current_time);
 
     // 8. Current Number of Processes
-    pid_t ppid = getpid();
+    pid_t ppid = getppid();
     pid_t child_pids[MAX_CHILDREN];
     size_t max_children = sizeof(child_pids) / sizeof(child_pids[0]);
     printf("Parent PID: %d\n", ppid);
-    int process_count = get_child_processes(ppid, child_pids, max_children);
+    int process_count = get_child_processes(ppid);
 
-    printf("Number of child processes: %d\n", process_count);
     for (int i = 0; i < process_count; ++i) {
         printf("Child process ID: %d\n", child_pids[i]);
     }
@@ -132,45 +131,44 @@ int is_number(const char *s) {
  *
  * returns: The number of child processes found.
  */
-int get_child_processes(pid_t parent_pid, pid_t *child_pids, size_t max_children) {
-    DIR *proc_dir;
-    struct dirent *entry;
-    FILE *fp;
-    char path[1024], line[256];
-    pid_t pid, ppid;
-    size_t child_count = 0;
+int get_child_processes(pid_t parent_pid) {
+    int num_children = 0;
+    struct kinfo_proc *procs = NULL;
+    size_t procs_size = 0;
 
-    proc_dir = opendir("/proc");
-    if (!proc_dir) {
-        perror("opendir(/proc)");
+    // Define MIB array for sysctl call
+    int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_ALL, 0};
+
+    // Get size of data
+    if (sysctl(mib, 4, NULL, &procs_size, NULL, 0) < 0) {
+        perror("sysctl");
         return -1;
     }
 
-    while ((entry = readdir(proc_dir)) != NULL) {
-        if (child_count >= max_children) {
-            break; // buffer is full
-        }
+    // Allocate memory for process data
+    procs = malloc(procs_size);
+    if (procs == NULL) {
+        perror("malloc");
+        return -1;
+    }
 
-        if (entry->d_type == DT_DIR && is_number(entry->d_name)) {
-            pid = atoi(entry->d_name);
+    // Get process data
+    if (sysctl(mib, 4, procs, &procs_size, NULL, 0) < 0) {
+        perror("sysctl");
+        free(procs);
+        return -1;
+    }
 
-            snprintf(path, sizeof(path), "/proc/%d/status", pid);
-            fp = fopen(path, "r");
-            if (fp) {
-                while (fgets(line, sizeof(line), fp)) {
-                    if (strncmp(line, "PPid:", 5) == 0) {
-                        sscanf(line, "PPid:\t%d", &ppid);
-                        if (ppid == parent_pid) {
-                            child_pids[child_count++] = pid;
-                            break;
-                        }
-                    }
-                }
-                fclose(fp);
-            }
+    // Number of processes
+    int num_procs = procs_size / sizeof(struct kinfo_proc);
+
+    // Iterate through processes
+    for (int i = 0; i < num_procs; i++) {
+        if (procs[i].kp_eproc.e_ppid == parent_pid) {
+            num_children++;
         }
     }
 
-    closedir(proc_dir);
-    return child_count; // Return the number of child processes found
+    free(procs);
+    return num_children;
 }
