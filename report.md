@@ -9,6 +9,7 @@ This is a simple shell program written in C.
 `make` to compile the program.
 `./myshell` to run the program.
 Alternatively `make run` to compile and run the program.
+`make clean` to clean the directory from the executable, object, alias and history files.
 
 ## Some Design Decisions and Specifications
 

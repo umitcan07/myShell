@@ -1,22 +1,3 @@
-/* Custom shell with most of the features of a standard shell.
- * The shell should be able to execute commands in foreground & background,
- * create aliases, and redirect input and output.
- *
- * The prompt string should be of the form:
- * username@hostname:cwd ---
- *
- * The shell should support the following special operations:
- * > - redirect output to a file (overwrite)
- * >> - redirect output to a file (append)
- * >>> - redirect output to a file (append, but invert the order of all letters
- * in the output) & - run the command in the background
- *
- * Other specifications:
- * It works in a fork-exec manner.
- * It can run each and every command in the PATH environment variable.
- * In case of a collision between an alias and a command, the alias should take
- * precedence.
- */
 #include <ctype.h>
 #include <limits.h>
 #include <signal.h>
@@ -59,13 +40,25 @@ int main(int argc, char **argv) {
     // Add bin directory to PATH
     add_directory_to_path("bin");
 
-    // Create an empty .aliases file if it does not exist
-    FILE *aliases_file = fopen(".aliases", "w");
-    if (aliases_file == NULL) {
-        printf("Error: Failed to create .aliases file.\n");
-        return 1;
+    // Try to open the file in read mode
+    FILE *file = fopen(".aliases", "r");
+
+    // Check if the file does not exist
+    if (file == NULL) {
+        // File does not exist, so create it in write mode
+        file = fopen(".aliases", "w");
+
+        // Check if the file was successfully created
+        if (file == NULL) {
+            printf("Error: Failed to create .aliases file.\n");
+            return 1;
+        }
     }
-    fclose(aliases_file);
+
+    // Close the file if it's open
+    if (file != NULL) {
+        fclose(file);
+    }
 
     // Create an empty .history file if it does not exist
     FILE *history_file = fopen(".history", "w");
@@ -396,6 +389,16 @@ void trim_whitespace(char *str) {
     *(end + 1) = 0;
 }
 
+/* Function: get_alias
+ * --------------------
+ * Gets the value of an alias.
+ *
+ * alias_name: The name of the alias.
+ * buffer: The buffer to store the alias value.
+ * buffer_size: The size of the buffer.
+ *
+ * returns: void
+ */
 void get_alias(const char *alias_name, char *buffer, size_t buffer_size) {
     FILE *file = fopen(".aliases", "r");
     if (!file) {
@@ -432,6 +435,16 @@ void get_alias(const char *alias_name, char *buffer, size_t buffer_size) {
     fclose(file);
 }
 
+/* Function: replace_alias_in_command
+ * --------------------
+ * Replaces an alias name with its value in a command.
+ *
+ * input: The command to be processed.
+ * output: The processed command.
+ * max_output_length: The maximum length of the output buffer.
+ *
+ * returns: void
+ */
 void replace_alias_in_command(char *input, char *output, size_t max_output_length) {
     char temp_input[MAX_INPUT_LENGTH];
     strncpy(temp_input, input, MAX_INPUT_LENGTH);

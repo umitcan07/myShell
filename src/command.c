@@ -4,6 +4,15 @@
 
 #include "../lib/command.h"
 
+/* Function: parse_command
+ * -----------------------
+ * Parses a list of tokens into a command struct.
+ *
+ * tokens: A list of tokens to parse.
+ * tokenCount: The number of tokens in the list.
+ *
+ * returns: A command struct representing the parsed command.
+ */
 command parse_command(char *tokens[], int tokenCount) {
     command cmd;
     cmd.op = OTHER; // Default to OTHER for regular commands
@@ -54,6 +63,12 @@ command parse_command(char *tokens[], int tokenCount) {
     return cmd;
 }
 
+/* Function: print_command
+ * -----------------------
+ * Prints the contents of a command struct.
+ *
+ * cmd: The command struct to print.
+ */
 void print_command(command cmd) {
     printf("Operation: %d\n", cmd.op);
     printf("Arguments (%d): ", cmd.num_arguments);
