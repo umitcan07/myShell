@@ -83,3 +83,18 @@ void print_tokens(char *tokens[MAX_TOKENS], int tokenCount) {
         printf("Token[%d]: %s\n", i, tokens[i]);
     }
 }
+
+/* Function:  free_tokens
+ * --------------------
+ * Frees the tokens in the tokens array.
+ *
+ * tokens: the array of tokens to free
+ * tokenCount: the number of tokens in the array
+ *
+ * returns: void
+ */
+void free_tokens(char *tokens[MAX_TOKENS], int tokenCount) {
+    for (int i = 0; i < tokenCount; i++) {
+        free(tokens[i]);
+    }
+}

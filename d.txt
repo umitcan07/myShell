@@ -1,0 +1,14 @@
+Makefile
+README.md
+a.txt
+b.txt
+bin
+c.tct
+checklist
+d.txt
+history.txt
+lib
+myshell
+report.md
+src
+x.y

@@ -1,5 +1,4 @@
-x = y
-ls = my new ls
-xyz = echo  hello world
-y = echo  hello world
-t = yy
+x =  echo  hello world
+m = ls -q
+n = ls >> a.txt
+tt = ls -a >> aaa.txt

@@ -1,9 +1,8 @@
 {
-    "C_Cpp.clang_format_style": "{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Custom, BraceWrapping: { AfterFunction: false } }",
+    "C_Cpp.clang_format_style": "{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Custom, BraceWrapping: { AfterFunction: false }, ColumnLimit: 0 }",
     "editor.formatOnSave": true,
     "editor.formatOnType": true,
     "files.associations": {
-        "*.mjml": "mjml",
         "stdlib.h": "c",
         "__config": "c",
         "cstdio": "c",

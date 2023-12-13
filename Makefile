@@ -2,7 +2,8 @@ SRC = ${wildcard src/*.c}
 
 # Default target for compilation
 default: $(SRC)
-	gcc $^ -o ./myshell
+	gcc-13 src/bello/bello.c -o bin/bello
+	gcc-13 $^ -o ./myshell
 
 # Run target for executing the program after compilation
 run: default
