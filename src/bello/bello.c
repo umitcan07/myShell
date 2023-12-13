@@ -1,9 +1,10 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "bello.h"
 
-
-int main(int argc, char **argv) {
-    return bello();
-}
+int main(int argc, char **argv) { return bello(); }
 
 /*
  * Function:  bello
@@ -11,12 +12,14 @@ int main(int argc, char **argv) {
  * Displays various information about the user and system:
  * 1. Username: Retrieved using getlogin().
  * 2. Hostname: Retrieved using gethostname().
- * 3. Last Executed Command: This would need to be tracked by your shell and passed to this function.
+ * 3. Last Executed Command: This would need to be tracked by your shell and
+ * passed to this function.
  * 4. TTY: Retrieved using ttyname() on file descriptor 0.
  * 5. Current Shell Name: Retrieved from the SHELL environment variable.
  * 6. Home Location: Retrieved from the HOME environment variable.
  * 7. Current Time and Date: Retrieved using time() and localtime().
- * 8. Current Number of Processes: Retrieved by executing the 'ps -e' command and counting lines of output.
+ * 8. Current Number of Processes: Retrieved by executing the 'ps -e' command
+ * and counting lines of output.
  *
  * returns: 0 if successful, 1 if an error occurs.
  */

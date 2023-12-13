@@ -1,16 +1,17 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../lib/tokenize.h"
 
 /* Function:  tokenize
  * --------------------
- * Tokenizes the input string into tokens. The tokens are stored in the tokens array.
- * 
+ * Tokenizes the input string into tokens. The tokens are stored in the tokens
+ * array.
+ *
  * input: the string to tokenize
  * tokens: the array to store the tokens in
- * 
+ *
  * returns: the number of tokens
  */
 int tokenize(char *input, char *tokens[MAX_TOKENS]) {
@@ -68,15 +69,13 @@ int tokenize(char *input, char *tokens[MAX_TOKENS]) {
     return tokenCount;
 }
 
-
-
 /* Function:  print_tokens
  * --------------------
  * Prints the tokens in the tokens array.
- * 
+ *
  * tokens: the array of tokens to print
  * tokenCount: the number of tokens in the array
- * 
+ *
  * returns: void
  */
 void print_tokens(char *tokens[MAX_TOKENS], int tokenCount) {

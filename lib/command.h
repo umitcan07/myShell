@@ -1,18 +1,8 @@
 #define MAX_ARGUMENTS 256
 
-typedef enum operation {
-    NO_OP,
-    EXIT,
-    ALIAS,
-    OTHER
-} operation;
+typedef enum operation { NO_OP, EXIT, ALIAS, OTHER } operation;
 
-typedef enum redirect {
-    NO_REDIRECT,
-    OUTPUT,
-    APPEND,
-    REVERSE
-} redirect;
+typedef enum redirect { NO_REDIRECT, OUTPUT, APPEND, REVERSE } redirect;
 
 typedef struct command {
     operation op;

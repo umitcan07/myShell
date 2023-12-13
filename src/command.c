@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../lib/command.h"
 
@@ -22,33 +22,29 @@ command parse_command(char *tokens[], int tokenCount) {
         cmd.op = EXIT;
     } else if (strcmp(tokens[0], "alias") == 0) {
         cmd.op = ALIAS;
-        // Additional alias handling logic can be added here
     }
 
     // Parse arguments and check for background/redirect flags
     for (int i = 0; i < tokenCount; ++i) {
         if (strcmp(tokens[i], "&") == 0) {
             cmd.background = 1;
-            continue; // Skip the '&' token and continue processing
+            continue; // Skip the '&' token
         }
 
-        if (i < tokenCount - 1) { // Check next token for redirection
+        // Check and handle redirection operators
+        if (i < tokenCount - 1 &&
+            (strcmp(tokens[i], ">") == 0 || strcmp(tokens[i], ">>") == 0 ||
+             strcmp(tokens[i], ">>>") == 0)) {
+            // Set the appropriate redirect type
             if (strcmp(tokens[i], ">") == 0) {
                 cmd.redirect = OUTPUT;
-                cmd.arguments[cmd.num_arguments++] = tokens[i + 1]; // Next token is the file name
-                i++; // Skip the next token as it's already processed
-                continue;
             } else if (strcmp(tokens[i], ">>") == 0) {
                 cmd.redirect = APPEND;
-                cmd.arguments[cmd.num_arguments++] = tokens[i + 1];
-                i++;
-                continue;
             } else if (strcmp(tokens[i], ">>>") == 0) {
                 cmd.redirect = REVERSE;
-                cmd.arguments[cmd.num_arguments++] = tokens[i + 1];
-                i++;
-                continue;
             }
+            i++; // Skip the next token (filename for redirection)
+            continue;
         }
 
         // Regular argument
@@ -57,7 +53,6 @@ command parse_command(char *tokens[], int tokenCount) {
 
     return cmd;
 }
-
 
 void print_command(command cmd) {
     printf("Operation: %d\n", cmd.op);
@@ -68,4 +63,3 @@ void print_command(command cmd) {
     printf("\nBackground: %d\n", cmd.background);
     printf("Redirect: %d\n", cmd.redirect);
 }
-
