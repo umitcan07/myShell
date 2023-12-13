@@ -1,45 +1,43 @@
 # myshell
 
-Ümit Can Evleksiz (2020400114)
-
 ## Introduction
+
+This is a simple shell program written in C.
+
+## Usage
 
 `make` to compile the program.
 `./myshell` to run the program.
 Alternatively `make run` to compile and run the program.
 
-## Features
+## Some Design Decisions and Specifications
 
-- The prompt string: `username@hostname:cwd ---`
-- `>` - redirect output to a file (overwrite)
-- `>>` - redirect output to a file (append)
-- `>>>` - redirect output to a file (append, but invert the order of all letters in the output)
-- `&` - run the command in the background
-- `alias x = y` - create an alias for the command y, named x
-
-### Some Design Decisions and Specifications
-
-- It works in a fork-exec manner, meaning that it creates a child process for each command.
-- It can run each and every command in the PATH environment variable.
-- In case of a collision between an alias and a command, the alias should take precedence.
-- Use of getcwd() as cwd for the prompt string. This is done to make sure that the prompt string is always up to date.
-- Process count takes into account the zombie processes as well since they are not waited for.
+- Use of `getcwd()` as cwd for the prompt string. This is done to make sure that the prompt string is always up to date.
+- Aliases are stored in a file called `.aliases` in the same directory as the myshell executable. It is created from scratch every time the shell is run.
+- If there's a conflict between an alias and a command, the alias is prioritized
+- Last executed command is stored in a file called `.history` in the same directory as the myshell executable. It is created if it does not exist. It is overwritten if it exists.
 - Last executed command resolves into a raw command from the user, including all the arguments. (i.e. input: `ls -l >> a.txt`, output: `ls -l >> a.txt`)
-- Background processing yields prompt string to be printed before the command is finished executing, similar to how bash handles.
-- Alias resolves into corresponding command and arguments while right after getting the input from the user. (i.e. input: `ls -l`, alias: `ls = ls -a`, output: `ls -l -a`)
+- Process count takes into account the zombie processes as well since they are not waited for.
+- Background processing yields prompt string to be printed before the command is finished executing, similar to how `Bash` handles.
+- `bello` functionality is provided as an executable file in the `/bin` with respect to `myshell` executable. After it is compiled within the same makefile, the directory `/bin`is added to the PATH. Therefore, whenever`bello` is called, there guaranteed to be at least 1 child process.
+- Alias resolves into corresponding command and arguments right after getting the input from the user. (i.e. input: `lp -l`, alias: `lp = ls -a`, output: `ls -l -a`)
+- `.local` is manintained in the `@hostname` part of the prompt string. No manual intervention was made to change it.
 
-### Difficulties Encountered
+## Difficulties Encountered
 
-- Whether or not tokenize anything in double quotes as a single token/word.
+- Whether or not tokenize anything in double quotes as a single token/word, tokenizing in general.
 - Background processing, zombie processes, and process count.
 - Resolving aliases while tokenizing the input from the user.
-
-### Functional Limitations
-
--
+- Handling `>>>` operation since it required another `fork()` call.
 
 ### Variable Limitations (`#define`d MACROS)
 
 - MAX_LINE_LENGTH: 1024
-- MAX_TOKEN_COUNT: 256
+- MAX_TOKENS: 256
 - MAX_TOKEN_LENGTH: 256
+- MAX_ALIASES: 512
+- MAX_ARGUMENTS: 256
+- MAX_PATH_LENGTH: 1024
+- MAX_INPUT_LENGTH: 1024
+
+### <span class="author_text"> Ümit Can Evleksiz (2020400114) </span>

@@ -59,6 +59,22 @@ int main(int argc, char **argv) {
     // Add bin directory to PATH
     add_directory_to_path("bin");
 
+    // Create an empty .aliases file if it does not exist
+    FILE *aliases_file = fopen(".aliases", "w");
+    if (aliases_file == NULL) {
+        printf("Error: Failed to create .aliases file.\n");
+        return 1;
+    }
+    fclose(aliases_file);
+
+    // Create an empty .history file if it does not exist
+    FILE *history_file = fopen(".history", "w");
+    if (history_file == NULL) {
+        printf("Error: Failed to create .history file.\n");
+        return 1;
+    }
+    fclose(history_file);
+
     // Main loop for the commands
     while (1) {
         // Prompt string: username@hostname:cwd ---
@@ -83,9 +99,6 @@ int main(int argc, char **argv) {
         char output[MAX_INPUT_LENGTH];
 
         replace_alias_in_command(input, output, MAX_INPUT_LENGTH);
-        // Tokenize input
-        printf("Input: %s\n", input);
-        printf("Replaced command: %s\n", output);
 
         int tokenCount = tokenize(output, tokens);
         if (tokenCount == 0) {
@@ -97,16 +110,12 @@ int main(int argc, char **argv) {
 
         command cmd = parse_command(tokens, tokenCount);
 
-        // For debugging purposes
-        print_command(cmd);
-
         switch (cmd.op) {
         case NO_OP:
             break;
 
         case EXIT:
-            printf("Exiting shell...\n");
-            exit(0);
+            exit(EXIT_SUCCESS);
             break;
 
         case ALIAS:
@@ -122,7 +131,7 @@ int main(int argc, char **argv) {
 
             executablePath = find_executable(cmd.arguments[0]);
             if (!executablePath) {
-                printf("Command not found: %s\n", cmd.arguments[0]);
+                printf("myshell: command not found: %s\n", cmd.arguments[0]);
                 break;
             }
 
@@ -168,23 +177,63 @@ int main(int argc, char **argv) {
                         dup2(fileno(fp), STDOUT_FILENO);
                         fclose(fp);
                     } else if (cmd.redirect == 3) {
-                        // Append, but invert the order of all letters in the
-                        // output
-                        fp = fopen(output_file, "a");
-                        if (fp == NULL) {
-                            printf("Error: Unable to open file for reverse redirecting.\n");
-                            exit(1);
+                        // We need pipes and subchildren for this to reverse the output from execv()
+                        int pipefd[2];
+                        // handle error on pipe creation
+                        if (pipe(pipefd) == -1) {
+                            perror("pipe");
+                            exit(EXIT_FAILURE);
                         }
+                        pid_t pid2;
+                        pid2 = fork();
+                        if (pid2 == 0) {
+                            // Child process
+                            close(pipefd[0]); // Close unused read end
+                            dup2(pipefd[1], STDOUT_FILENO);
+                            close(pipefd[1]); // Close write end
+                            execv(executablePath, cmd.arguments);
+                            exit(EXIT_FAILURE);
+                        } else if (pid2 > 0) {
+                            // Parent process
+                            // We will invert the output from the child process and then redirect it to the file
+                            close(pipefd[1]); // Close unused write end
+                            char tmp[MAX_INPUT_LENGTH];
+                            ssize_t num_read;
+                            num_read = read(pipefd[0], tmp, MAX_INPUT_LENGTH);
+                            if (num_read == -1) {
+                                perror("read");
+                                exit(EXIT_FAILURE);
+                            }
+                            tmp[num_read] = '\0';
 
-                        // Redirect stdout to the file
-                        dup2(fileno(fp), STDOUT_FILENO);
+                            // Invert the output string
+                            // i.e. "Hello World" becomes "dlroW olleH"
+
+                            FILE *fp = fopen(output_file, "a");
+                            if (fp == NULL) {
+                                printf("Error: Unable to open file for "
+                                       "redirecting.\n");
+                                exit(1);
+                            }
+                            for (int i = strlen(tmp) - 1; i >= 0; i--) {
+                                fprintf(fp, "%c", tmp[i]);
+                            }
+                            fclose(fp);
+
+                            exit(0);
+
+                        } else {
+                            perror("Fork failed");
+                        }
                     }
 
                     // Redirect stdout to the file
                     dup2(fileno(fp), STDOUT_FILENO);
                     fclose(fp);
                 }
-                execv(executablePath, cmd.arguments);
+                if (cmd.redirect != 3) { // Since we already redirected stdout to the pipe and then to the file, we don't need execv() again for the reverse output
+                    execv(executablePath, cmd.arguments);
+                }
                 perror("execv"); // If execv returns, there was an error
                 exit(1);
             } else if (pid > 0) {
@@ -210,14 +259,6 @@ int main(int argc, char **argv) {
 
     // Free the last command
     free(last_command);
-
-    // Initialize the .history file as empty
-    FILE *fp = fopen(".history", "w");
-    if (fp == NULL) {
-        printf("Error: Unable to open history file.\n");
-        return 1;
-    }
-    fclose(fp);
 
     return 0;
 }

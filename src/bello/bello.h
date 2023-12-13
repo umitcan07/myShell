@@ -7,7 +7,9 @@
 #include <time.h>
 #include <unistd.h>
 
-#define MAX_PATH_LENGTH 256
-#define MAX_CHILDREN 256
+#define MAX_PATH_LENGTH 512
 
+void print_info(char *username, char *hostname, char *last_executed_command, char *tty, char *shell_name, char *home_location, time_t time_info, struct tm *time_struct, int process_count);
+int is_number(const char *s);
+int get_child_processes(pid_t parent_pid);
 int bello();

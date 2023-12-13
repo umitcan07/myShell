@@ -1,0 +1,25 @@
+body {
+  font-family: 'Inter V', sans-serif;
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: -0.02em;
+  color: #333;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Aeonik Pro', sans-serif;
+}
+
+.author_text {
+  font-family: 'Aeonik Pro', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 18px;
+  letter-spacing: -0.02em;
+  color: #333;
+}

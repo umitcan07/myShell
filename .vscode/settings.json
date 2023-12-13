@@ -3,6 +3,7 @@
     "editor.formatOnSave": true,
     "editor.formatOnType": true,
     "files.associations": {
+        "*.mjml": "mjml",
         "stdlib.h": "c",
         "__config": "c",
         "cstdio": "c",
@@ -16,6 +17,8 @@
         "limits.h": "c",
         "bello.h": "c",
         "unistd.h": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "tokenize.h": "c",
+        "dirent.h": "c"
     }
 }

@@ -1,9 +1,5 @@
 #include "bello.h"
 
-void print_info(char *username, char *hostname, char *last_executed_command, char *tty, char *shell_name, char *home_location, time_t time_info, struct tm *time_struct, int process_count);
-int is_number(const char *s);
-int get_child_processes(pid_t parent_pid);
-
 int main(int argc, char **argv) { return bello(); }
 
 /*
@@ -65,14 +61,8 @@ int bello() {
 
     // 8. Current Number of Processes
     pid_t ppid = getppid();
-    pid_t child_pids[MAX_CHILDREN];
-    size_t max_children = sizeof(child_pids) / sizeof(child_pids[0]);
-    printf("Parent PID: %d\n", ppid);
     int process_count = get_child_processes(ppid);
 
-    for (int i = 0; i < process_count; ++i) {
-        printf("Child process ID: %d\n", child_pids[i]);
-    }
     // Print the information
     print_info(username, hostname, last_executed_command, tty, shell_name, home_location, current_time, time_info, process_count);
 
@@ -94,7 +84,7 @@ int bello() {
  * process_count: The number of processes currently running.
  */
 void print_info(char *username, char *hostname, char *last_executed_command, char *tty, char *shell_name, char *home_location, time_t time_info, struct tm *time_struct, int process_count) {
-    printf("1. Usernameeee: %s\n", username);
+    printf("1. Username: %s\n", username);
     printf("2. Hostname: %s\n", hostname);
     printf("3. Last Executed Command: %s\n", last_executed_command);
     printf("4. TTY: %s\n", tty);

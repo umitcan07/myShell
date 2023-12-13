@@ -1,4 +1,0 @@
-x =  echo  hello world
-m = ls -q
-n = ls >> a.txt
-tt = ls -a >> aaa.txt
