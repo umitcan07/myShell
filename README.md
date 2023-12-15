@@ -4,6 +4,19 @@
 
 This is a simple shell written in C.
 
+## How To Run
+
+`make` to compile the source code.
+`./myshell` to run after compiling.
+
+---
+
+Alternatively `make run` to compile and run
+
+---
+
+`make clean` to clean the repository from object, executable, alias and history files
+
 ## Features
 
 - The prompt string: `username@hostname:cwd ---`
